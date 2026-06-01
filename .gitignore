@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Environment — NEVER commit secrets
+.env
+.env.local
+.env.*.local
+
+# Playwright output
+test-results/
+playwright-report/
+
+# Reports
+reports/
+allure-results/
+allure-report/
+
+# TypeScript build
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln

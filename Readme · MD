@@ -1,0 +1,135 @@
+# Skoda Parts — Playwright E2E Test Suite
+
+Automated E2E tests for [skoda-parts.com](https://www.skoda-parts.com) using **Playwright** + **TypeScript** + **Allure Reports**.
+
+---
+
+## Project Structure
+
+```
+project-root/
+├── .github/
+│   └── workflows/
+│       └── playwright.yml       ← GitHub Actions CI/CD
+├── helpers/
+│   
+│   └── helpers.ts               ← Shared utilities
+├── pages/
+│   ├── LoginPage.ts
+│   ├── RegisterPage.ts
+│   └── SearchPage.ts
+├── tests/
+│   ├── login.spec.ts
+│   ├── register.spec.ts
+│   └── search.spec.ts
+├── test-data/
+│   ├── login.data.ts
+│   └── register.data.ts
+├── fixtures/
+│   └── pages.fixture.ts
+    └──  allure.fixture.ts      ←  Allure steps, screenshots, video
+
+├── .env                         ← Local only — never committed
+├── .gitignore
+├── package.json
+├── tsconfig.json
+└── playwright.config.ts
+```
+
+---
+
+## Local Setup
+
+### 1. Clone the repo
+```bash
+git https://github.com/hubautomation2026/skoda-parts-Assignment5-2026.git
+cd Assignment Automation
+```
+
+### 2. Install dependencies
+```bash
+npm install
+```
+
+### 3. Install Playwright browsers
+```bash
+npx playwright install --with-deps chromium
+```
+
+### 4. Create your `.env` file
+```bash
+cp .env.example .env
+```
+Then fill in your values:
+```dotenv
+BASE_URL=https://www.skoda-parts.com
+
+VALID_EMAIL=test555@test.com
+VALID_PASSWORD=abcdef12345
+
+INVALID_EMAIL=wrong@example.com
+INVALID_PASSWORD=wrongpassword123
+```
+
+---
+
+## Running Tests
+
+```bash
+# Run all tests (headless)
+npm test
+
+# Run with browser visible
+npm run test:headed
+
+# Run specific suite
+npm run test:login
+npm run test:register
+npm run test:search
+
+# Debug mode (step through)
+npm run test:debug
+```
+
+---
+
+## Allure Report
+
+```bash
+# Run tests then open live Allure report
+npm run report
+
+# Or separately:
+npm test
+npm run allure:generate
+npm run allure:open
+```
+
+---
+
+## CI/CD — GitHub Actions
+
+### How it works
+
+Every push to `main` or `develop` automatically:
+
+1. Installs Node.js + dependencies
+2. Installs Playwright + Chromium
+3. Reads secrets → creates `.env`
+4. Runs all Playwright tests
+5. Generates Allure report
+
+
+### Setting up GitHub Secrets
+
+Go to: `GitHub repo → Settings → Secrets and variables → Actions → New repository secret`
+
+| Secret name      | Value                          |
+|------------------|-------------------------------|
+| `BASE_URL`       | `https://www.skoda-parts.com` |
+| `VALID_EMAIL`    | test555@test.com         |
+| `VALID_PASSWORD` | abcdef12345                 |
+  `INVALID_EMAIL`  |     wrong@example.com
+`INVALID_PASSWORD` |    wrongpassword123
+
+
