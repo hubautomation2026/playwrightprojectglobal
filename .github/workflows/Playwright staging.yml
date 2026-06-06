@@ -35,7 +35,7 @@ jobs:
         run: npm test
         continue-on-error: true
         env:
-          CI: 'true'
+          CI: "true"
           BASE_URL: ${{ secrets.STAGING_BASE_URL }}        # ← staging URL
           VALID_EMAIL: ${{ secrets.STAGING_VALID_EMAIL }}
           VALID_PASSWORD: ${{ secrets.STAGING_VALID_PASSWORD }}
