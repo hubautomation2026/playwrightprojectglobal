@@ -1,97 +1,197 @@
-name: Playwright Tests + Allure Report
+name: 🎭 Playwright Tests
 
 on:
-  # ✅ Run on every push to main or develop
   push:
     branches: [main, develop]
 
-  # ✅ Run on every pull request targeting main
   pull_request:
     branches: [main]
 
-  # ✅ Allow manual trigger from GitHub Actions tab
   workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Which tests to run?'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - login
+          - register
+          - search
+
+  schedule:
+    - cron: '0 6 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
-    name: Run Playwright Tests
+
+  install:
+    name: 📦 Install Dependencies
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
     steps:
-      # ── 1. Checkout code ──────────────────────────────────────────────
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # ── 2. Setup Node.js ──────────────────────────────────────────────
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      # ── 3. Install dependencies ───────────────────────────────────────
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      # ── 4. Install Playwright browsers ───────────────────────────────
+      - name: Cache Playwright browsers
+        id: cache-browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
       - name: Install Playwright browsers
+        if: steps.cache-browsers.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
-      # ── 5. Install Allure CLI ─────────────────────────────────────────
-      - name: Install Allure CLI
-        run: npm install -g allure-commandline --save-dev
+  login-tests:
+    name: 🔐 Login Tests
+    runs-on: ubuntu-latest
+    needs: install
+    if: |
+      github.event.inputs.test_suite == 'all' ||
+      github.event.inputs.test_suite == 'login' ||
+      github.event.inputs.test_suite == ''
+    steps:
+      - uses: actions/checkout@v4
 
-      # ── 6. Create .env from GitHub Secrets ───────────────────────────
-      - name: Create .env file
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - run: npx playwright install-deps chromium
+
+      - name: Run Login Tests
+        run: npx playwright test tests/login.spec.ts --project=chromium
+        env:
+             CI: "true"
+             VALID_EMAIL: ${{ secrets.VALID_EMAIL }}
+             VALID_PASSWORD: ${{ secrets.VALID_PASSWORD }}
+
+            
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: login-test-report
+          path: reports/
+          retention-days: 30
+
+  register-tests:
+    name: 📝 Registration Tests
+    runs-on: ubuntu-latest
+    needs: install
+    if: |
+      github.event.inputs.test_suite == 'all' ||
+      github.event.inputs.test_suite == 'register' ||
+      github.event.inputs.test_suite == ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - run: npx playwright install-deps chromium
+
+      - name: Run Registration Tests
+        run: npx playwright test tests/register.spec.ts --project=chromium
+        env:
+             CI: "true"
+             VALID_EMAIL: ${{ secrets.VALID_EMAIL }}
+             VALID_PASSWORD: ${{ secrets.VALID_PASSWORD }}
+          
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: register-test-report
+          path: reports/
+          retention-days: 30
+
+  search-tests:
+    name: 🔍 Search Tests
+    runs-on: ubuntu-latest
+    needs: install
+    if: |
+      github.event.inputs.test_suite == 'all' ||
+      github.event.inputs.test_suite == 'search' ||
+      github.event.inputs.test_suite == ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - run: npx playwright install-deps chromium
+
+      - name: Run Search Tests
+        run: npx playwright test tests/search.spec.ts --project=chromium
+        env:
+             CI: "true"
+             VALID_EMAIL: ${{ secrets.VALID_EMAIL }}
+             VALID_PASSWORD: ${{ secrets.VALID_PASSWORD }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: search-test-report
+          path: reports/
+          retention-days: 30
+
+  notify:
+    name: 📊 Test Summary
+    runs-on: ubuntu-latest
+    needs: [login-tests, register-tests, search-tests]
+    if: always()
+    steps:
+      - name: All tests passed
+        if: needs.login-tests.result == 'success' && needs.register-tests.result == 'success' && needs.search-tests.result == 'success'
         run: |
-          echo "BASE_URL=${{ secrets.BASE_URL }}"         >> .env
-          echo "VALID_EMAIL=${{ secrets.VALID_EMAIL }}"   >> .env
-          echo "VALID_PASSWORD=${{ secrets.VALID_PASSWORD }}" >> .env
+          echo "✅ ALL TESTS PASSED"
+          echo "  Login Tests:        PASSED"
+          echo "  Registration Tests: PASSED"
+          echo "  Search Tests:       PASSED"
 
-      # ── 7. Run Playwright tests ───────────────────────────────────────
-      - name: Run Playwright tests
-        run: npx playwright test
-        continue-on-error: true   # ✅ Don't stop — we still want the report
-
-      # ── 8. Generate Allure report ─────────────────────────────────────
-      - name: Generate Allure report
-        if: always()              # ✅ Always generate even if tests fail
-        run: allure generate allure-results --clean -o allure-report
-
-      # ── 9. Upload Allure report as artifact ───────────────────────────
-      - name: Upload Allure report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-report
-          path: allure-report/
-          retention-days: 30
-
-      # ── 10. Upload Playwright HTML report ─────────────────────────────
-      - name: Upload Playwright HTML report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-html-report
-          path: reports/html-report/
-          retention-days: 30
-
-      # ── 11. Upload videos (always, not just on failure) ───────────────
-      - name: Upload test videos
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-videos
-          path: test-results/
-          retention-days: 15
-
-      # ── 12. Publish Allure report to GitHub Pages ─────────────────────
-      - name: Deploy Allure report to GitHub Pages
-        if: github.ref == 'refs/heads/main' && always()
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: allure-report
-          publish_branch: gh-pages
-          destination_dir: allure-report
+      - name: Some tests failed
+        if: needs.login-tests.result == 'failure' || needs.register-tests.result == 'failure' || needs.search-tests.result == 'failure'
+        run: |
+          echo "❌ SOME TESTS FAILED"
+          echo "  Login Tests:        ${{ needs.login-tests.result }}"
+          echo "  Registration Tests: ${{ needs.register-tests.result }}"
+          echo "  Search Tests:       ${{ needs.search-tests.result }}"
+          exit 1

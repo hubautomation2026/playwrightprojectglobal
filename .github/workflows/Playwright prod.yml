@@ -1,0 +1,70 @@
+name: Playwright Tests — Production
+
+on:
+  # Production runs on a schedule — every weekday at 8am Cairo (05:00 UTC)
+  # You don't want prod tests running on every push — only on schedule or manual
+  #Cron schedule — 0 5 * * 1-5 means: at minute 0, hour 5 UTC, every weekday (1=Monday, 5=Friday). That's 8:00 AM Cairo time. Your tests now run automatically every morning before you open your laptop, even if nobody pushed any code.
+  schedule:
+    - cron: '0 5 * * 1-5'
+
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Why are you running this manually?'
+        required: false
+        default: 'Manual production run'
+
+jobs:
+  test-production:
+    name: Run Tests on Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run Playwright tests — Production
+        run: npm test
+        continue-on-error: true
+        env:
+          CI: 'true'
+          BASE_URL: ${{ secrets.PROD_BASE_URL }}           # ← production URL
+          VALID_EMAIL: ${{ secrets.PROD_VALID_EMAIL }}
+          VALID_PASSWORD: ${{ secrets.PROD_VALID_PASSWORD }}
+          INVALID_EMAIL: ${{ secrets.INVALID_EMAIL }}
+          INVALID_PASSWORD: ${{ secrets.INVALID_PASSWORD }}
+
+      - name: Generate Allure report
+        if: always()
+        run: npx allure generate allure-results --clean -o allure-report
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-allure-report-${{ github.run_number }}
+          path: allure-report/
+          retention-days: 14
+
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "❌ PRODUCTION TESTS FAILED"
+          echo "Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          exit 1
+
+      - name: Report success
+        if: success()
+        run: echo "✅ PRODUCTION TESTS PASSED — Run ${{ github.run_number }}"

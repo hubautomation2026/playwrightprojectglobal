@@ -17,9 +17,9 @@ import { validRegistration,invalidRegistrations } from '../test-data/register.da
 
 test.describe('TC01 -invalidEmail registration flow',()=>{
 test('Full registration',
-  async({page})=>{
-    const registerPage = new RegisterPage(page);
-    await registerPage.goto();
+  async({registerPage})=>{
+   // const registerPage = new RegisterPage(page);
+   // await registerPage.goto();
     await registerPage.fillRegisterForm(invalidRegistrations.invalidEmail);
 
   }
@@ -32,9 +32,9 @@ test('Full registration',
 
 test.describe('TC02 -Registartion Form-Full registration flow',()=>{
 test('Full registration',
-  async({page})=>{
-    const registerPage = new RegisterPage(page);
-    await registerPage.goto();
+  async({registerPage })=>{
+   // const registerPage = new RegisterPage(page);
+   // await registerPage.goto();
     await registerPage.fillRegisterForm(validRegistration);
   }
   );

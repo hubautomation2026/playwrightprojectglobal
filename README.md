@@ -1,10 +1,7 @@
 # Skoda Parts — Playwright E2E Automation Suite
-
-![CI](https://github.com/hubautomation2026/playwrightprojectglobal/actions/workflows/playwright.yml/badge.svg)
-![Playwright](https://img.shields.io/badge/Playwright-1.43-45ba4b?logo=playwright)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript)
-![License](https://img.shields.io/badge/License-MIT-blue)
-
+![Staging](https://github.com/hubautomation2026/playwrightprojectglobal/actions/workflows/playwright-staging.yml/badge.svg)
+![Production](https://github.com/hubautomation2026/playwrightprojectglobal/actions/workflows/playwright-prod.yml/badge.svg)
+![Playwright](https://img.shields.io/badge/Playwright-TypeScript-45ba4b?logo=playwright)
 End-to-end test automation suite for [skoda-parts.com](https://www.skoda-parts.com) — an automotive spare parts e-commerce platform. Built with **Playwright + TypeScript**, following the Page Object Model pattern, with full CI/CD via GitHub Actions and multi-format reporting through Allure, HTML, and JSON.
 
 ---

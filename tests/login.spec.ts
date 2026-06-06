@@ -11,23 +11,23 @@ import { validUser,invalidUsers } from '../test-data/login.data';
 // ════════════════════════════════════════════════════════════════════
 // 2. POSITIVE TEST — SUCCESSFUL LOGIN
 // ════════════════════════════════════════════════════════════════════
-test.describe("Login Tests", () => {
-  let loginPage: LoginPage;
+//test.describe("Login Tests", () => {
+ // let loginPage: LoginPage;
 
-  test.beforeEach(async ({ page }) => {
+ /* test.beforeEach(async ({ page }) => {
     loginPage = new LoginPage(page);
     await loginPage.goto();
-  });
-  test("TC01 - Login fails with invalid password", async ({ page }) => {
+  });*/
+  test("TC01 - Login fails with invalid password", async ({ loginPage,page  }) => {
     await loginPage.login(invalidUsers.wrongPassword);
     // Page should still show the login area or show an error
-    await expect(page.getByRole('link', { name: 'User login' })).toBeVisible();
+    await expect(page .getByRole('link', { name: 'User login' })).toBeVisible();
   });
- test("TC02 - Successful login with valid credentials", async ({ page }) => {
+ test("TC02 - Successful login with valid credentials", async ({ loginPage,page  }) => {
     await loginPage.login(validUser);
 
     // After login, "User login" link should disappear or user menu should appear
-    await expect(page.getByRole('link', { name: 'User login' })).not.toBeVisible();
+    await expect(page .getByRole('link', { name: 'User login' })).not.toBeVisible();
   });
 
 
@@ -69,4 +69,3 @@ test.describe("Login Tests", () => {
     await page.locator('body').click({ position: { x: 400, y: 400 } });
     await expect(loginPage.emailField).not.toBeVisible({ timeout: 5_000 });
   });*/
-});

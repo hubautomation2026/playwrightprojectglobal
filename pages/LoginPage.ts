@@ -34,7 +34,7 @@ export class LoginPage {
 
   /** Navigate directly to the login page */
   async goto() {
-    await this.page.goto('https://www.skoda-parts.com/online-store.html');
+    await this.page.goto('/online-store.html');
     await this.page.waitForLoadState('networkidle');
   }
 
