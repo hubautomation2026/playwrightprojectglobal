@@ -12,34 +12,20 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
 
   reporter: [
-    // ── Allure reporter ──────────────────────────────────────────────
-    // Generates raw Allure results in allure-results/.
-    // After the run, generate the HTML report with:
-    //   npx allure generate allure-results --clean -o allure-report
-    // Then open it with:
-    //   npx allure open allure-report
     ['allure-playwright', {
-      outputFolder: 'allure-results',
-      // Attach screenshots, videos, and traces automatically
-      attachmentsBaseURL: 'allure-results',
+      outputFolder: 'allure-results',   // only this line needed
     }],
-
-    // ── Built-in reporters ───────────────────────────────────────────
-    ['html',  { outputFolder: 'reports/html-report', open: 'never' }],
+    ['html', { outputFolder: 'reports/html-report', open: 'never' }],
     ['list'],
-    ['json',  { outputFile: 'reports/test-results.json' }],
+    ['json', { outputFile: 'reports/test-results.json' }],
   ],
 
   use: {
-    baseURL: 'https://www.skoda-parts.com',
+    baseURL: process.env.BASE_URL || 'https://www.skoda-parts.com',
+    //       ↑ reads secret in CI, falls back to prod URL locally
 
-    // ── Screenshots ──────────────────────────────────────────────────
     screenshot: 'only-on-failure',
-
-    // ── Video recording — record and keep every test ─────────────────
     video: 'on',
-
-    // ── Traces ───────────────────────────────────────────────────────
     trace: 'on-first-retry',
 
     viewport:          { width: 1280, height: 720 },
@@ -49,8 +35,6 @@ export default defineConfig({
 
   timeout: 60_000,
   expect: { timeout: 10_000 },
-
-  // ── Output dir for videos / screenshots / traces ─────────────────
   outputDir: 'test-results',
 
   projects: [
