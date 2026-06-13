@@ -37,9 +37,12 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
 
-      # Run ONLY tests tagged @smoke
+      # ── Run ONLY @smoke tagged tests ──────────────────────────────────
+      # Using npx directly — does NOT depend on package.json scripts
+      # continue-on-error: true means pipeline keeps running so report is always generated
       - name: Run smoke tests
-        run: npm run test:smoke || true    # ← change this line
+        run: npx playwright test --grep @smoke
+        continue-on-error: true
         env:
           CI: 'true'
           BASE_URL: ${{ secrets.STAGING_BASE_URL }}
@@ -48,13 +51,16 @@ jobs:
           INVALID_EMAIL: ${{ secrets.INVALID_EMAIL }}
           INVALID_PASSWORD: ${{ secrets.INVALID_PASSWORD }}
 
+      # ── Reports ───────────────────────────────────────────────────────
       - name: Generate Allure report
         if: always()
         run: |
           if [ -d "allure-results" ]; then
             npx allure generate allure-results --clean -o allure-report
+            echo "✅ Allure report generated"
           else
-            echo "⚠️ No allure-results found"
+            echo "⚠️ No allure-results folder found"
+            echo "Make sure allure-playwright is in package.json and set in playwright.config.ts reporter"
           fi
 
       - name: Upload Allure report
@@ -66,11 +72,27 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-playwright-report-${{ github.run_number }}
+          path: playwright-report/
+          retention-days: 7
+          if-no-files-found: warn
+
+      # ── Notifications ─────────────────────────────────────────────────
       - name: Report failure
         if: failure()
         run: |
           echo "❌ SMOKE TESTS FAILED — critical path is broken"
-          echo "Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "──────────────────────────────────────────────"
+          echo "Repository : ${{ github.repository }}"
+          echo "Branch     : ${{ github.ref_name }}"
+          echo "Triggered  : ${{ github.actor }}"
+          echo "Run number : ${{ github.run_number }}"
+          echo "Run URL    : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "──────────────────────────────────────────────"
           exit 1
 
       - name: Report success
