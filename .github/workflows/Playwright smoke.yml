@@ -39,8 +39,7 @@ jobs:
 
       # Run ONLY tests tagged @smoke
       - name: Run smoke tests
-        run: npm run test:smoke
-        continue-on-error: true
+        run: npm run test:smoke || true    # ← change this line
         env:
           CI: 'true'
           BASE_URL: ${{ secrets.STAGING_BASE_URL }}
