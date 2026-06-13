@@ -16,7 +16,7 @@ import { validRegistration,invalidRegistrations } from '../test-data/register.da
 // ════════════════════════════════════════════════════════════════════
 
 test.describe('TC01 -invalidEmail registration flow',()=>{
-test('Full registration',
+test('Full registration',{ tag: ['@smoke'] },
   async({registerPage})=>{
    // const registerPage = new RegisterPage(page);
    // await registerPage.goto();

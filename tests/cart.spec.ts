@@ -15,7 +15,7 @@ import { cartProducts } from '../test-data/cart.data';
 
 test.describe('Cart — Add Products', () => {
 
-  test('TC01 — Add one product to cart', async ({ page }) => {
+  test('TC01 — Add one product to cart' ,{ tag: ['@smoke'] }, async ({ page }) => {
     const cart = new CartPage(page);
 
     // Go to product page
@@ -34,7 +34,7 @@ test.describe('Cart — Add Products', () => {
     await expect(page.getByText(/Air Filter|1J0 129 620/i)).toBeVisible();
   });
 
-  test('TC02 — Add product with quantity 2', async ({ page }) => {
+  test('TC02 — Add product with quantity 2 ', async ({ page }) => {
     const cart = new CartPage(page);
 
     await cart.goToProduct(cartProducts.oilFilter.path);
@@ -49,7 +49,7 @@ test.describe('Cart — Add Products', () => {
     await expect(cart.cartEmptyMessage).not.toBeVisible();
   });
 
-  test('TC03 — Add two different products to cart', async ({ page }) => {
+  test('TC03 — Add two different products to cart',{ tag: ['@regression'] }, async ({ page }) => {
     const cart = new CartPage(page);
 
     // Add first product
@@ -66,7 +66,7 @@ test.describe('Cart — Add Products', () => {
     await expect(page.getByText(/Oil Filter/i)).toBeVisible();
   });
 
-  test('TC04 — Cart header link shows correct item count after adding', async ({ page }) => {
+  test('TC04 — Cart header link shows correct item count after adding',{ tag: ['@smoke'] }, async ({ page }) => {
     const cart = new CartPage(page);
 
     await cart.goToProduct(cartProducts.cabinFilter.path);

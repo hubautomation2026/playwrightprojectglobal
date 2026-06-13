@@ -18,7 +18,7 @@ import { validUser,invalidUsers } from '../test-data/login.data';
     loginPage = new LoginPage(page);
     await loginPage.goto();
   });*/
-  test("TC01 - Login fails with invalid password", async ({ loginPage,page  }) => {
+  test("TC01 - Login fails with invalid password",{ tag: ['@smoke'] }, async ({ loginPage,page  }) => {
     await loginPage.login(invalidUsers.wrongPassword);
     // Page should still show the login area or show an error
     await expect(page .getByRole('link', { name: 'User login' })).toBeVisible();

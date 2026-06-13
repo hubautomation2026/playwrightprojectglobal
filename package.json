@@ -5,9 +5,12 @@
   "scripts": {
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",
+      "test:smoke": "npx playwright test --grep \"@smoke\"",
+   "test:regression": "playwright test --grep @regression",
     "test:ui": "npx playwright test --ui",
     "test:debug": "npx playwright test --debug",
     "test:login": "npx playwright test tests/login.spec.ts",
+    "test:cart": "npx playwright test tests/cart.spec.ts",
     "test:report": "npx playwright show-report",
     "test:chrome": "npx playwright test --project=chromium",
     "test:firefox": "npx playwright test --project=firefox",
