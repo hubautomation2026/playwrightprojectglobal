@@ -1,4 +1,4 @@
-name: Smoke Tests
+name: Playwright Smoke Tests
 
 # Smoke runs on EVERY push to main
 # Fast — only critical path tests
